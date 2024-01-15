@@ -34,31 +34,6 @@ const Transactions = () => {
       const response = await axios.post(uploadEndpoint, { videoData: videoData.split(",")[1] });
       setUploadResponse(response.data);
       toast.success("Video uploaded successfully!");
-
-      // Array to store all details responses
-      const detailsResponses: any[] = [];
-
-      // Introduce a delay before fetching video details multiple times
-      for (let i = 0; i < 3; i++) {
-        const detailsEndpoint = `https://kl8no40qhb.execute-api.eu-west-2.amazonaws.com/dev/user/findUserShortVideo?item_id=${response.data.data.item_id}`;
-        const detailsResponse = await axios.get(detailsEndpoint);
-        detailsResponses.push(detailsResponse.data);
-
-        // Delay between requests (adjust as needed)
-        await new Promise((resolve) => setTimeout(resolve, 5000));
-      }
-
-      // Set state with the last details response
-      setDetailsResponse(detailsResponses[detailsResponses.length - 1]);
-
-      // Auto-load the uploaded video into the video player
-      if (videoRef.current) {
-        // Assuming the video URL is correctly returned from the API
-        const videoUrl = detailsResponses[detailsResponses.length - 1].data.videoS3Url;
-        videoRef.current.src = videoUrl;
-        videoRef.current.load();
-        videoRef.current.play(); // Auto-play the video if needed
-      }
     } catch (error: any) {
       console.error("Error during upload:", error);
 
@@ -150,17 +125,9 @@ const Transactions = () => {
 
       {loading && (
         <div className='mt-4 flex justify-center'>
-          <div className='animate-spin rounded-full border-t-2 border-blue-500 border-t-blue-500 h-12 w-12'></div>
+          <p className='text-lg font-bold mb-2'>Loading...</p>
         </div>
       )}
-
-      {/* Video player section */}
-      <div className='mt-4'>
-        <h2 className='text-lg font-bold mb-2'>Uploaded Video:</h2>
-        <video ref={videoRef} controls width='100%' height='auto'>
-          Your browser does not support the video tag.
-        </video>
-      </div>
 
       {uploadResponse && (
         <div className='mt-4'>
@@ -178,6 +145,14 @@ const Transactions = () => {
         </div>
       )}
 
+      {/* Video player section */}
+      <div className='mt-4'>
+        <h2 className='text-lg font-bold mb-2'>Uploaded Video:</h2>
+        <video ref={videoRef} controls width='100%' height='auto'>
+          Your browser does not support the video tag.
+        </video>
+      </div>
+      
       <ToastContainer />
     </div>
   );
