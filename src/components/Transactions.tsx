@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -7,7 +7,11 @@ import FileBase64 from "react-file-base64";
 const Transactions = () => {
   const [userId, setUserId] = useState<string>("");
   const [videoData, setVideoData] = useState<string | null>(null);
-  const [uploadResponse, setUploadResponse] = useState<any | null>(null); // Added state for response details
+  const [uploadResponse, setUploadResponse] = useState<any | null>(null);
+  const [detailsResponse, setDetailsResponse] = useState<any | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   const handleUserIdChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setUserId(event.target.value);
@@ -23,15 +27,79 @@ const Transactions = () => {
       return;
     }
 
-    const endpoint = `https://kl8no40qhb.execute-api.eu-west-2.amazonaws.com/dev/user/uploadUserShortVideo?user_id=${userId}`;
+    const uploadEndpoint = `https://kl8no40qhb.execute-api.eu-west-2.amazonaws.com/dev/user/uploadUserShortVideo?user_id=${userId}`;
 
     try {
-      const response = await axios.post(endpoint, { videoData: videoData.split(",")[1] }); // Extract base64 string
-      setUploadResponse(response.data); // Update response details state
+      setLoading(true);
+      const response = await axios.post(uploadEndpoint, { videoData: videoData.split(",")[1] });
+      setUploadResponse(response.data);
       toast.success("Video uploaded successfully!");
-    } catch (error) {
-      console.error("Error uploading video:", error);
-      toast.error("Error uploading video. Please try again.");
+
+      // Array to store all details responses
+      const detailsResponses: any[] = [];
+
+      // Introduce a delay before fetching video details multiple times
+      for (let i = 0; i < 3; i++) {
+        const detailsEndpoint = `https://kl8no40qhb.execute-api.eu-west-2.amazonaws.com/dev/user/findUserShortVideo?item_id=${response.data.data.item_id}`;
+        const detailsResponse = await axios.get(detailsEndpoint);
+        detailsResponses.push(detailsResponse.data);
+
+        // Delay between requests (adjust as needed)
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+      }
+
+      // Set state with the last details response
+      setDetailsResponse(detailsResponses[detailsResponses.length - 1]);
+
+      // Auto-load the uploaded video into the video player
+      if (videoRef.current) {
+        // Assuming the video URL is correctly returned from the API
+        const videoUrl = detailsResponses[detailsResponses.length - 1].data.videoS3Url;
+        videoRef.current.src = videoUrl;
+        videoRef.current.load();
+        videoRef.current.play(); // Auto-play the video if needed
+      }
+    } catch (error: any) {
+      console.error("Error during upload:", error);
+
+      if (error.response) {
+        toast.error(`Error during upload: ${error.response.data.message}`);
+      } else if (error.request) {
+        toast.error("Error getting video details. Please try again later.");
+      } else {
+        toast.error("Unexpected error uploading video. Please try again later.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGetDetails = async () => {
+    if (!uploadResponse) {
+      toast.error("Please upload a video first");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      // Hit the details endpoint once
+      const detailsEndpoint = `https://kl8no40qhb.execute-api.eu-west-2.amazonaws.com/dev/user/findUserShortVideo?item_id=${uploadResponse.data.item_id}`;
+      const detailsResponse = await axios.get(detailsEndpoint);
+      setDetailsResponse(detailsResponse.data);
+
+      // Auto-load the uploaded video into the video player
+      if (videoRef.current) {
+        // Assuming the video URL is correctly returned from the API
+        const videoUrl = detailsResponse.data.data.videoS3Url;
+        videoRef.current.src = videoUrl;
+        videoRef.current.load();
+        videoRef.current.play(); // Auto-play the video if needed
+      }
+    } catch (error: any) {
+      console.error("Error getting video details:", error);
+      toast.error("Error getting video details. Please try again later.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -72,13 +140,41 @@ const Transactions = () => {
       </div>
       <div className='w-full border-t mt-4 border-gray-300' />
 
+      {loading && (
+        <div className='mt-4 flex justify-center'>
+          <div className='animate-spin rounded-full border-t-2 border-blue-500 border-t-blue-500 h-12 w-12'></div>
+        </div>
+      )}
+
+      {/* Video player section */}
+      <div className='mt-4'>
+        <h2 className='text-lg font-bold mb-2'>Uploaded Video:</h2>
+        <video ref={videoRef} controls width='100%' height='auto'>
+          Your browser does not support the video tag.
+        </video>
+      </div>
+
       {uploadResponse && (
         <div className='mt-4'>
           <h2 className='text-lg font-bold mb-2'>Upload Response:</h2>
-          <div>
-            {/* Add any additional elements or styling here if needed */}
-          </div>
+          <div>{/* Add any additional elements or styling here if needed */}</div>
           <pre className='bg-gray-100 p-4 text-sm rounded-md'>{JSON.stringify(uploadResponse, null, 2)}</pre>
+
+          {/* "Get Details" button */}
+          <button
+            onClick={handleGetDetails}
+            className='w-full bg-blue-500 text-white p-2 rounded-md mt-4 hover:bg-blue-700 focus:outline-none focus:ring focus:border-blue-500'
+          >
+            Get Details
+          </button>
+        </div>
+      )}
+
+      {detailsResponse && (
+        <div className='mt-4'>
+          <h2 className='text-lg font-bold mb-2'>Full Video Details:</h2>
+          <div>{/* Add any additional elements or styling here if needed */}</div>
+          <pre className='bg-gray-100 p-4 text-sm rounded-md'>{JSON.stringify(detailsResponse, null, 2)}</pre>
         </div>
       )}
 

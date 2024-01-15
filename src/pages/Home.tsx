@@ -4,9 +4,9 @@ import Transactions from "../components/Transactions";
 
 const Home = () => {
   return (
-    <div>
+    <div className="">
       <Navbar />
-      <div className="md:px-20">
+      <div className='md:px-20'>
         <Transactions />
       </div>
     </div>
