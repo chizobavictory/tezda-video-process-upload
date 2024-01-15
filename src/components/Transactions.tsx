@@ -110,9 +110,11 @@ const Transactions = () => {
           <div>
             <p className='font-[degularbold] md:text-2xl text-xl'>Upload Video Logic</p>
             <p className='font-[degularmedium] text-gray-600'>
-              Your video is uploaded in one API call taking in the userId, and then that user Id is used for a second API call that gets the item
-              details from the db that includes the data gotten from the other background processes run like the adaptive bitrates and the labels
-              generated from AWS Rekognition{" "}
+              Your video is uploaded when you select a video and click upload video. After it is done uploading a button appears allowing you to get a
+              video details.
+              <br />
+              This video details is the result of the background Lambda functions that are triggered when a video is uploaded. It gives the video
+              labels based on the uploaded video (AWS rekognition and redshift) and the adaptive bitrates of the video (FFMPEG)
             </p>
           </div>
           <div>
