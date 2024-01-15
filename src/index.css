@@ -1,0 +1,38 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+@font-face {
+  font-family: 'degularregular';
+  src: url('../public/fonts/Degular-Regular.otf');
+}
+
+@font-face {
+  font-family: 'degularbold';
+  src: url('../public/fonts/Degular-Bold.otf');
+}
+
+@font-face {
+  font-family: 'degularblack';
+  src: url('../public/fonts/Degular-Black.otf');
+}
+
+@font-face {
+  font-family: 'degularlight';
+  src: url('../public/fonts/Degular-Light.otf');
+}
+
+@font-face {
+  font-family: 'degularmedium';
+  src: url('../public/fonts/Degular-Medium.otf');
+}
+
+@font-face {
+  font-family: 'degularthin';
+  src: url('../public/fonts/Degular-Thin.otf');
+}
+
+@font-face {
+  font-family: 'degularsemibold';
+  src: url('../public/fonts/Degular-Semibold.otf');
+}
