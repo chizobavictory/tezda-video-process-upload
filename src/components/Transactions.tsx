@@ -138,6 +138,12 @@ const Transactions = () => {
           >
             Upload Video
           </button>
+          <button
+            onClick={handleGetDetails}
+            className='w-full bg-green-500 text-white p-2 rounded-md mt-4 hover:bg-blue-700 focus:outline-none focus:ring focus:border-blue-500'
+          >
+            Get Details
+          </button>
         </div>
       </div>
       <div className='w-full border-t mt-4 border-gray-300' />
@@ -161,14 +167,6 @@ const Transactions = () => {
           <h2 className='text-lg font-bold mb-2'>Upload Response:</h2>
           <div>{/* Add any additional elements or styling here if needed */}</div>
           <pre className='bg-gray-100 p-4 text-sm rounded-md'>{JSON.stringify(uploadResponse, null, 2)}</pre>
-
-          {/* "Get Details" button */}
-          <button
-            onClick={handleGetDetails}
-            className='w-full bg-blue-500 text-white p-2 rounded-md mt-4 hover:bg-blue-700 focus:outline-none focus:ring focus:border-blue-500'
-          >
-            Get Details
-          </button>
         </div>
       )}
 
