@@ -27,7 +27,7 @@ const Transactions = () => {
       return;
     }
 
-    const uploadEndpoint = `https://kl8no40qhb.execute-api.eu-west-2.amazonaws.com/dev/user/uploadUserShortVideo?user_id=${userId}`;
+    const uploadEndpoint = `https://kl8no40qhb.execute-api.eu-west-2.amazonaws.com/test/user/uploadUserShortVideo?user_id=${userId}`;
 
     try {
       setLoading(true);
