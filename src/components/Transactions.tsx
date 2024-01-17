@@ -130,18 +130,18 @@ const Transactions = () => {
       )}
 
       {uploadResponse && (
-        <div className='mt-4 overflow-auto'>
+        <div className='mt-4 overflow-auto bg-gray-100'>
           <h2 className='text-lg font-bold mb-2'>Upload Response:</h2>
           <div>{/* Add any additional elements or styling here if needed */}</div>
-          <pre className='bg-gray-100 p-4 text-sm rounded-md'>{JSON.stringify(uploadResponse, null, 2)}</pre>
+          <pre className=' p-4 text-sm rounded-md'>{JSON.stringify(uploadResponse, null, 2)}</pre>
         </div>
       )}
 
       {detailsResponse && (
-        <div className='mt-4 overflow-auto'>
+        <div className='mt-4 overflow-auto bg-gray-100'>
           <h2 className='text-lg font-bold mb-2'>Full Video Details:</h2>
           <div>{/* Add any additional elements or styling here if needed */}</div>
-          <pre className='bg-gray-100 p-4 text-sm rounded-md'>{JSON.stringify(detailsResponse, null, 2)}</pre>
+          <pre className=' p-4 text-sm rounded-md'>{JSON.stringify(detailsResponse, null, 2)}</pre>
         </div>
       )}
 
