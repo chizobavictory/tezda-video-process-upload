@@ -4,6 +4,8 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import FileBase64 from "react-file-base64";
 
+
+
 const Transactions = () => {
   const [userId, setUserId] = useState<string>("");
   const [videoData, setVideoData] = useState<string | null>(null);
@@ -21,26 +23,42 @@ const Transactions = () => {
     setVideoData(file.base64);
   };
 
+ 
   const handleUpload = async () => {
     if (!userId || !videoData) {
       toast.error("Please enter user ID and select a video");
       return;
     }
 
-    const uploadEndpoint = `https://kl8no40qhb.execute-api.eu-west-2.amazonaws.com/dev/user/uploadUserShortVideo?user_id=${userId}`;
+    const presignedUrlEndpoint = `https://kl8no40qhb.execute-api.eu-west-2.amazonaws.com/test/user/createUserUploadPresignedUrl?user_id=${userId}`;
 
     try {
       setLoading(true);
-      const response = await axios.post(uploadEndpoint, { videoData: videoData.split(",")[1] });
-      setUploadResponse(response.data);
+
+      // Step 1: Request a presigned URL
+      const presignedUrlResponse = await axios.post(presignedUrlEndpoint);
+      console.log("Response from presigned URL request:", presignedUrlResponse);
+      const presignedUrl = presignedUrlResponse.data.data;
+
+      // Step 2: Upload the video to S3 using the presigned URL
+      console.log("Uploading video data:", videoData.split(",")[1]);
+      await axios.put(presignedUrl, videoData.split(",")[1], {
+        headers: {
+          "Content-Type": "video/mp4",
+          "Access-Control-Allow-Origin": "*",
+        },
+      });
+
+      const item_id = presignedUrlResponse.data.data.item_id;
+
+      // Step 3: After successful upload, you can now trigger other actions or display a success message.
+      setUploadResponse({ message: "Video uploaded successfully", data: { presignedUrl } });
       toast.success("Video uploaded successfully!");
     } catch (error: any) {
       console.error("Error during upload:", error);
 
       if (error.response) {
         toast.error(`Error during upload: ${error.response.data.message}`);
-      } else if (error.request) {
-        toast.error("Error getting video details. Please try again later.");
       } else {
         toast.error("Unexpected error uploading video. Please try again later.");
       }
@@ -58,7 +76,7 @@ const Transactions = () => {
     try {
       setLoading(true);
       // Hit the details endpoint once
-      const detailsEndpoint = `https://kl8no40qhb.execute-api.eu-west-2.amazonaws.com/dev/user/findUserShortVideo?item_id=${uploadResponse.data.item_id}`;
+      const detailsEndpoint = `https://kl8no40qhb.execute-api.eu-west-2.amazonaws.com/dev/user/findUserShortVideo?item_id=${"579b55046bb3ad0160f8acdbd0f9876c"}`;
       const detailsResponse = await axios.get(detailsEndpoint);
       setDetailsResponse(detailsResponse.data);
 
