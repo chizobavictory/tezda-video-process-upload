@@ -4,11 +4,9 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import FileBase64 from "react-file-base64";
 
-
-
 const Transactions = () => {
   const [userId, setUserId] = useState<string>("");
-  const [videoData, setVideoData] = useState<string | null>(null);
+  const [videoData, setVideoData] = useState<File | null>(null);
   const [uploadResponse, setUploadResponse] = useState<any | null>(null);
   const [detailsResponse, setDetailsResponse] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
@@ -19,11 +17,25 @@ const Transactions = () => {
     setUserId(event.target.value);
   };
 
-  const handleVideoUpload = (file: { base64: string }) => {
-    setVideoData(file.base64);
+  const getItemIdFromPresignedUrl = (presignedUrl: string) => {
+    try {
+      const url = new URL(presignedUrl);
+      const path = url.pathname;
+      const pathParts = path.split('/');
+      const fileName = pathParts[pathParts.length - 1];
+      // Remove the file extension, assuming it's always ".mp4"
+      const itemId = fileName.replace(/\.mp4$/, '');
+      return itemId;
+    } catch (error) {
+      console.error('Error extracting item ID from presigned URL:', error);
+      return null;
+    }
   };
 
- 
+  const handleVideoUpload = (file: { file: File }) => {
+    setVideoData(file.file);
+  };
+
   const handleUpload = async () => {
     if (!userId || !videoData) {
       toast.error("Please enter user ID and select a video");
@@ -41,18 +53,18 @@ const Transactions = () => {
       const presignedUrl = presignedUrlResponse.data.data;
 
       // Step 2: Upload the video to S3 using the presigned URL
-      console.log("Uploading video data:", videoData.split(",")[1]);
-      await axios.put(presignedUrl, videoData.split(",")[1], {
+      console.log("Uploading video data:", videoData);
+      await axios.put(presignedUrl, videoData, {
         headers: {
           "Content-Type": "video/mp4",
           "Access-Control-Allow-Origin": "*",
         },
       });
 
-      const item_id = presignedUrlResponse.data.data.item_id;
+      const item_id = getItemIdFromPresignedUrl(presignedUrl);
 
-      // Step 3: After successful upload, you can now trigger other actions or display a success message.
-      setUploadResponse({ message: "Video uploaded successfully", data: { presignedUrl } });
+      // Step 3: After a successful upload, you can now trigger other actions or display a success message.
+      setUploadResponse({ message: "Video uploaded successfully", data: { presignedUrl, item_id } });
       toast.success("Video uploaded successfully!");
     } catch (error: any) {
       console.error("Error during upload:", error);
@@ -76,7 +88,7 @@ const Transactions = () => {
     try {
       setLoading(true);
       // Hit the details endpoint once
-      const detailsEndpoint = `https://kl8no40qhb.execute-api.eu-west-2.amazonaws.com/dev/user/findUserShortVideo?item_id=${"579b55046bb3ad0160f8acdbd0f9876c"}`;
+      const detailsEndpoint = `https://kl8no40qhb.execute-api.eu-west-2.amazonaws.com/dev/user/findUserShortVideo?item_id=${uploadResponse.data.item_id}`;
       const detailsResponse = await axios.get(detailsEndpoint);
       setDetailsResponse(detailsResponse.data);
 
@@ -95,6 +107,7 @@ const Transactions = () => {
       setLoading(false);
     }
   };
+
 
   return (
     <div className='flex flex-col md:pt-15 pt-5'>
