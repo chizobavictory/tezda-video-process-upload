@@ -14,6 +14,7 @@ const Transactions = () => {
   const [video360pUrl, setVideo360pUrl] = useState<string | null>(null);
   const [video540pUrl, setVideo540pUrl] = useState<string | null>(null);
   const [video720pUrl, setVideo720pUrl] = useState<string | null>(null);
+  const [loadingMessage, setLoadingMessage] = useState<string | null>(null);
 
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -105,7 +106,11 @@ const Transactions = () => {
     }
 
     try {
+      setLoadingMessage("Loading all video details...");
       setLoading(true);
+
+      // Display loading message while fetching details
+      // toast.info("Loading all video details...");
 
       // Hit the details endpoint once
       const detailsEndpoint = `https://kl8no40qhb.execute-api.eu-west-2.amazonaws.com/dev/user/findUserShortVideo?item_id=${uploadResponse.data.item_id}`;
@@ -140,13 +145,15 @@ const Transactions = () => {
           "Incomplete response. Missing attributes:",
           expectedAttributes.filter((attr) => !(attr in detailsResponse.data.data))
         );
-        toast.error("Incomplete response. Give it some time.");
+        // toast.error("Incomplete response. Give it some time.");
       }
     } catch (error) {
-      console.error("Error getting video details:", error);
       toast.error("Error getting video details. Please try again later.");
+      console.error("Error getting video details:", error);
+      setLoadingMessage("Error getting video details. Please try again later.");
     } finally {
       setLoading(false);
+      setLoadingMessage(null); // Reset loading message after handling response
     }
   };
 
@@ -197,7 +204,7 @@ const Transactions = () => {
 
       {loading && (
         <div className='mt-4 flex justify-center'>
-          <p className='text-lg font-bold mb-2'>Loading...</p>
+          <p className='text-lg font-bold mb-2'>{loadingMessage || "Loading..."}</p>
         </div>
       )}
 
