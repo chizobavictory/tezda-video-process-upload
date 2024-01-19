@@ -11,6 +11,9 @@ const Transactions = () => {
   const [detailsResponse, setDetailsResponse] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
   const [timeTaken, setTimeTaken] = useState<number | null>(null); // Added state for time taken
+  const [video360pUrl, setVideo360pUrl] = useState<string | null>(null);
+  const [video540pUrl, setVideo540pUrl] = useState<string | null>(null);
+  const [video720pUrl, setVideo720pUrl] = useState<string | null>(null);
 
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -112,7 +115,7 @@ const Transactions = () => {
       const detailsResponse = await axios.get(detailsEndpoint);
 
       // Measure end time
-      
+
       setDetailsResponse(detailsResponse.data);
       const endTime = performance.now();
 
@@ -123,6 +126,11 @@ const Transactions = () => {
         // Calculate and update the time taken
         const timeTaken = (endTime - startTime) / 100; // Convert to seconds
         setTimeTaken(timeTaken);
+
+        // Set video URLs
+        setVideo360pUrl(detailsResponse.data.data.adaptiveBitrateS3Url360p);
+        setVideo540pUrl(detailsResponse.data.data.adaptiveBitrateS3Url540p);
+        setVideo720pUrl(detailsResponse.data.data.adaptiveBitrateS3Url720p);
 
         // Auto-load the uploaded video into the video player
         if (videoRef.current) {
@@ -220,8 +228,38 @@ const Transactions = () => {
       )}
 
       {/* Video player section */}
+      <div className='flex justify-between mt-4'>
+        <div>
+          <h2 className='text-lg font-bold mb-2'>Video Details 360p:</h2>
+          {video360pUrl && (
+            <video controls width='100%' height='auto'>
+              <source src={video360pUrl} type='video/mp4' />
+              Your browser does not support the video tag.
+            </video>
+          )}
+        </div>
+        <div>
+          <h2 className='text-lg font-bold mb-2'>Video Details 540p:</h2>
+          {video540pUrl && (
+            <video controls width='100%' height='auto'>
+              <source src={video540pUrl} type='video/mp4' />
+              Your browser does not support the video tag.
+            </video>
+          )}
+        </div>
+        <div>
+          <h2 className='text-lg font-bold mb-2'>Video Details 720p:</h2>
+          {video720pUrl && (
+            <video controls width='100%' height='auto'>
+              <source src={video720pUrl} type='video/mp4' />
+              Your browser does not support the video tag.
+            </video>
+          )}
+        </div>
+      </div>
+
       <div className='mt-4'>
-        <h2 className='text-lg font-bold mb-2'>Uploaded Video:</h2>
+        <h2 className='text-lg font-bold mb-2'>Original Uploaded Video:</h2>
         <video ref={videoRef} controls width='100%' height='auto'>
           Your browser does not support the video tag.
         </video>
