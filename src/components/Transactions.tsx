@@ -95,7 +95,6 @@ const Transactions = () => {
     "adaptiveBitrateS3Url360p",
     "videoS3Url",
     "adaptiveBitrateS3Url540p",
-    "compressedVideoS3Url",
   ];
 
   const handleGetDetails = async () => {
@@ -108,13 +107,9 @@ const Transactions = () => {
     try {
       setLoading(true);
 
-      // Measure start time
-
       // Hit the details endpoint once
       const detailsEndpoint = `https://kl8no40qhb.execute-api.eu-west-2.amazonaws.com/dev/user/findUserShortVideo?item_id=${uploadResponse.data.item_id}`;
       const detailsResponse = await axios.get(detailsEndpoint);
-
-      // Measure end time
 
       setDetailsResponse(detailsResponse.data);
       const endTime = performance.now();
