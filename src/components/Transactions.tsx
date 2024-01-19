@@ -10,6 +10,7 @@ const Transactions = () => {
   const [uploadResponse, setUploadResponse] = useState<any | null>(null);
   const [detailsResponse, setDetailsResponse] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
+  const [timeTaken, setTimeTaken] = useState<number | null>(null); // Added state for time taken
 
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -21,13 +22,13 @@ const Transactions = () => {
     try {
       const url = new URL(presignedUrl);
       const path = url.pathname;
-      const pathParts = path.split('/');
+      const pathParts = path.split("/");
       const fileName = pathParts[pathParts.length - 1];
       // Remove the file extension, assuming it's always ".mp4"
-      const itemId = fileName.replace(/\.mp4$/, '');
+      const itemId = fileName.replace(/\.mp4$/, "");
       return itemId;
     } catch (error) {
-      console.error('Error extracting item ID from presigned URL:', error);
+      console.error("Error extracting item ID from presigned URL:", error);
       return null;
     }
   };
@@ -79,7 +80,23 @@ const Transactions = () => {
     }
   };
 
+  const expectedAttributes = [
+    "item_id",
+    "parentLabels",
+    "creation_timestamp",
+    "genre",
+    "video_duration",
+    "adaptiveBitrateS3Url",
+    "adaptiveBitrateS3Url720p",
+    "childLabels",
+    "adaptiveBitrateS3Url360p",
+    "videoS3Url",
+    "adaptiveBitrateS3Url540p",
+    "compressedVideoS3Url",
+  ];
+
   const handleGetDetails = async () => {
+    const startTime = performance.now();
     if (!uploadResponse) {
       toast.error("Please upload a video first");
       return;
@@ -87,27 +104,48 @@ const Transactions = () => {
 
     try {
       setLoading(true);
+
+      // Measure start time
+
       // Hit the details endpoint once
       const detailsEndpoint = `https://kl8no40qhb.execute-api.eu-west-2.amazonaws.com/dev/user/findUserShortVideo?item_id=${uploadResponse.data.item_id}`;
       const detailsResponse = await axios.get(detailsEndpoint);
-      setDetailsResponse(detailsResponse.data);
 
-      // Auto-load the uploaded video into the video player
-      if (videoRef.current) {
-        // Assuming the video URL is correctly returned from the API
-        const videoUrl = detailsResponse.data.data.videoS3Url;
-        videoRef.current.src = videoUrl;
-        videoRef.current.load();
-        videoRef.current.play(); // Auto-play the video if needed
+      // Measure end time
+      
+      setDetailsResponse(detailsResponse.data);
+      const endTime = performance.now();
+
+      // Check completeness of the response
+      const isResponseComplete = expectedAttributes.every((attr) => attr in detailsResponse.data.data);
+
+      if (isResponseComplete) {
+        // Calculate and update the time taken
+        const timeTaken = (endTime - startTime) / 100; // Convert to seconds
+        setTimeTaken(timeTaken);
+
+        // Auto-load the uploaded video into the video player
+        if (videoRef.current) {
+          // Assuming the video URL is correctly returned from the API
+          const videoUrl = detailsResponse.data.data.videoS3Url;
+          videoRef.current.src = videoUrl;
+          videoRef.current.load();
+          videoRef.current.play(); // Auto-play the video if needed
+        }
+      } else {
+        console.log(
+          "Incomplete response. Missing attributes:",
+          expectedAttributes.filter((attr) => !(attr in detailsResponse.data.data))
+        );
+        toast.error("Incomplete response. Give it some time.");
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error getting video details:", error);
       toast.error("Error getting video details. Please try again later.");
     } finally {
       setLoading(false);
     }
   };
-
 
   return (
     <div className='flex flex-col md:pt-15 pt-5'>
@@ -160,6 +198,11 @@ const Transactions = () => {
         </div>
       )}
 
+      <div className='mt-4 '>
+        <h2 className='text-lg font-bold mb-2'>Time Taken to Get details:</h2>
+        <div>{timeTaken !== null ? `${timeTaken.toFixed(2)} seconds` : "N/A"}</div>
+      </div>
+
       {uploadResponse && (
         <div className='mt-4 '>
           <h2 className='text-lg font-bold mb-2'>Upload Response:</h2>
@@ -168,7 +211,7 @@ const Transactions = () => {
         </div>
       )}
 
-      {detailsResponse && (
+      {detailsResponse && detailsResponse.data && expectedAttributes.every((attr) => attr in detailsResponse.data) && (
         <div className='mt-4 '>
           <h2 className='text-lg font-bold mb-2'>Full Video Details:</h2>
           <div>{/* Add any additional elements or styling here if needed */}</div>
