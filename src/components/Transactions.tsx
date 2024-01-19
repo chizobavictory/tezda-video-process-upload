@@ -108,9 +108,8 @@ const Transactions = () => {
     try {
       setLoadingMessage("Loading all video details...");
       setLoading(true);
+      toast.info("Loading all video details...");
 
-      // Display loading message while fetching details
-      // toast.info("Loading all video details...");
 
       // Hit the details endpoint once
       const detailsEndpoint = `https://kl8no40qhb.execute-api.eu-west-2.amazonaws.com/dev/user/findUserShortVideo?item_id=${uploadResponse.data.item_id}`;
@@ -123,6 +122,7 @@ const Transactions = () => {
       const isResponseComplete = expectedAttributes.every((attr) => attr in detailsResponse.data.data);
 
       if (isResponseComplete) {
+        toast.success("Video details loaded successfully!");
         // Calculate and update the time taken
         const timeTaken = (endTime - startTime) / 100; // Convert to seconds
         setTimeTaken(timeTaken);
@@ -141,6 +141,7 @@ const Transactions = () => {
           videoRef.current.play(); // Auto-play the video if needed
         }
       } else {
+        setLoadingMessage("Loading all video details...");
         console.log(
           "Incomplete response. Missing attributes:",
           expectedAttributes.filter((attr) => !(attr in detailsResponse.data.data))
