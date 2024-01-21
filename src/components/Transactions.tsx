@@ -69,7 +69,7 @@ const Transactions = () => {
       const item_id = getItemIdFromPresignedUrl(presignedUrl);
 
       // Step 3: After a successful upload, you can now trigger other actions or display a success message.
-      setUploadResponse({ message: "Video uploaded successfully", data: { presignedUrl, item_id } });
+      setUploadResponse({ message: "Video uploaded successfully", data: { presignedUrl, item_id, presignedUrlResponse } });
       toast.success("Video uploaded successfully!");
     } catch (error: any) {
       console.error("Error during upload:", error);
@@ -109,7 +109,6 @@ const Transactions = () => {
       setLoadingMessage("Loading all video details...");
       setLoading(true);
       toast.info("Loading all video details...");
-
 
       // Hit the details endpoint once
       const detailsEndpoint = `https://kl8no40qhb.execute-api.eu-west-2.amazonaws.com/dev/user/findUserShortVideo?item_id=${uploadResponse.data.item_id}`;
