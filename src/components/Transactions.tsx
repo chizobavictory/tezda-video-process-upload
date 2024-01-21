@@ -47,7 +47,7 @@ const Transactions = () => {
       return;
     }
 
-    const presignedUrlEndpoint = `https://kl8no40qhb.execute-api.eu-west-2.amazonaws.com/test/user/createUserUploadPresignedUrl?user_id=${userId}`;
+    const presignedUrlEndpoint = `https://kl8no40qhb.execute-api.eu-west-2.amazonaws.com/dev/user/createUserUploadPresignedUrl?user_id=${userId}`;
 
     try {
       setLoading(true);
