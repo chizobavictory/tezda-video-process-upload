@@ -96,6 +96,7 @@ const Transactions = () => {
     "childLabels",
     "adaptiveBitrateS3Url360p",
     "videoS3Url",
+    "user_id",
     "adaptiveBitrateS3Url540p",
   ];
 
