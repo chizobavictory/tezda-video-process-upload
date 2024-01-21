@@ -55,6 +55,7 @@ const Transactions = () => {
       // Step 1: Request a presigned URL
       const presignedUrlResponse = await axios.post(presignedUrlEndpoint);
       console.log("Response from presigned URL request:", presignedUrlResponse);
+      const user_id = presignedUrlResponse.data.user_id;
       const presignedUrl = presignedUrlResponse.data.data;
 
       // Step 2: Upload the video to S3 using the presigned URL
@@ -69,7 +70,7 @@ const Transactions = () => {
       const item_id = getItemIdFromPresignedUrl(presignedUrl);
 
       // Step 3: After a successful upload, you can now trigger other actions or display a success message.
-      setUploadResponse({ message: "Video uploaded successfully", data: { presignedUrl, item_id, presignedUrlResponse } });
+      setUploadResponse({ message: "Video uploaded successfully", data: { presignedUrl, item_id, user_id } });
       toast.success("Video uploaded successfully!");
     } catch (error: any) {
       console.error("Error during upload:", error);
