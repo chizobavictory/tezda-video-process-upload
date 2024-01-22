@@ -150,7 +150,7 @@ const Transactions = () => {
         // toast.error("Incomplete response. Give it some time.");
       }
     } catch (error) {
-      toast.error("Error getting video details. Please try again later.");
+      // toast.error("Error getting video details. Please try again later.");
       console.error("Error getting video details:", error);
       setLoadingMessage("Error getting video details. Please try again later.");
     } finally {
