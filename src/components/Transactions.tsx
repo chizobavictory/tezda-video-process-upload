@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -15,6 +15,23 @@ const Transactions = () => {
   const [video540pUrl, setVideo540pUrl] = useState<string | null>(null);
   const [video720pUrl, setVideo720pUrl] = useState<string | null>(null);
   const [loadingMessage, setLoadingMessage] = useState<string | null>(null);
+  const [userCountry, setUserCountry] = useState<string | null>(null);
+  const [userIpAddress, setUserIpAddress] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUserCountry = async () => {
+      try {
+        const response = await axios.get("https://ipinfo.io/json");
+        console.log("Response from IP info:", response);
+        setUserCountry(response.data.country);
+        setUserIpAddress(response.data.ip);
+      } catch (error) {
+        console.error("Error fetching user country:", error);
+      }
+    };
+
+    fetchUserCountry();
+  }, []);
 
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -211,8 +228,18 @@ const Transactions = () => {
       )}
 
       <div className='mt-4 '>
-        <h2 className='text-lg font-bold mb-2'>Time Taken to Get details:</h2>
-        <div>{timeTaken !== null ? `${timeTaken.toFixed(2)} seconds` : "N/A"}</div>
+        <div className='flex justify-between'>
+          <div>
+            <h2 className='text-lg font-bold mb-2'>Time Taken to Get details:</h2>
+            <div>{timeTaken !== null ? `${timeTaken.toFixed(2)} seconds` : "N/A"}</div>
+          </div>
+          <div>
+            <h2 className='text-lg font-bold mb-2'>Video upload location: {userCountry || "N/A"}</h2>
+          </div>
+          <div>
+            <h2 className='text-lg font-bold mb-2'>Video upload IP: {userIpAddress || "N/A"}</h2>
+          </div>
+        </div>
       </div>
 
       {uploadResponse && (
