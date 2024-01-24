@@ -80,7 +80,7 @@ const Transactions = () => {
 
       // Step 2: Upload the video to S3 using the presigned URL
       console.log("Uploading video data:", videoData);
-      await axios.put(presignedUrl, videoData, {
+      const result = await axios.put(presignedUrl, videoData, {
         headers: {
           "Content-Type": "video/mp4",
           "Access-Control-Allow-Origin": "*",
@@ -90,6 +90,8 @@ const Transactions = () => {
           // Add more metadata headers as needed
         },
       });
+      console.log("Response from S3:", result);
+      
       const item_id = getItemIdFromPresignedUrl(presignedUrl);
 
       // Step 3: After a successful upload, you can now trigger other actions or display a success message.
