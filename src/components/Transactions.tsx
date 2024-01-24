@@ -234,10 +234,12 @@ const Transactions = () => {
             <div>{timeTaken !== null ? `${timeTaken.toFixed(2)} seconds` : "N/A"}</div>
           </div>
           <div>
-            <h2 className='text-lg font-bold mb-2'>Video upload location: {userCountry || "N/A"}</h2>
+            <h2 className='text-lg font-bold mb-2'>Video upload location:</h2>
+            <div>{userCountry || "N/A"}</div>
           </div>
           <div>
-            <h2 className='text-lg font-bold mb-2'>Video upload IP: {userIpAddress || "N/A"}</h2>
+            <h2 className='text-lg font-bold mb-2'>Video upload IP:</h2>
+            <div>{userIpAddress || "N/A"}</div>
           </div>
         </div>
       </div>
