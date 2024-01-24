@@ -75,15 +75,21 @@ const Transactions = () => {
       const user_id = presignedUrlResponse.data.user_id;
       const presignedUrl = presignedUrlResponse.data.data;
 
+      const location = userCountry || "N/A";
+      const ipAddress = userIpAddress || "N/A";
+
       // Step 2: Upload the video to S3 using the presigned URL
       console.log("Uploading video data:", videoData);
       await axios.put(presignedUrl, videoData, {
         headers: {
           "Content-Type": "video/mp4",
           "Access-Control-Allow-Origin": "*",
+          "x-amz-meta-user-id": userId,
+          "x-amz-meta-location": location,
+          "x-amz-meta-ip-address": ipAddress,
+          // Add more metadata headers as needed
         },
       });
-
       const item_id = getItemIdFromPresignedUrl(presignedUrl);
 
       // Step 3: After a successful upload, you can now trigger other actions or display a success message.
