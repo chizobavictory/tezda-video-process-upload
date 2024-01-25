@@ -17,6 +17,7 @@ const Transactions = () => {
   const [loadingMessage, setLoadingMessage] = useState<string | null>(null);
   const [userCountry, setUserCountry] = useState<string | null>(null);
   const [userIpAddress, setUserIpAddress] = useState<string | null>(null);
+  const [requestBody, setRequestBody] = useState({ location: "", ipAddress: "" });
 
   useEffect(() => {
     const fetchUserCountry = async () => {
@@ -25,6 +26,7 @@ const Transactions = () => {
         console.log("Response from IP info:", response);
         setUserCountry(response.data.country);
         setUserIpAddress(response.data.ip);
+        setRequestBody({ location: response.data.country, ipAddress: response.data.ip });
       } catch (error) {
         console.error("Error fetching user country:", error);
       }
@@ -70,7 +72,7 @@ const Transactions = () => {
       setLoading(true);
 
       // Step 1: Request a presigned URL
-      const presignedUrlResponse = await axios.post(presignedUrlEndpoint);
+      const presignedUrlResponse = await axios.post(presignedUrlEndpoint, requestBody); 
       console.log("Response from presigned URL request:", presignedUrlResponse);
       const user_id = presignedUrlResponse.data.user_id;
       const presignedUrl = presignedUrlResponse.data.data;
