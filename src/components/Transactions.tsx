@@ -134,6 +134,7 @@ const Transactions = () => {
       // Hit the details endpoint once
       const detailsEndpoint = `https://kl8no40qhb.execute-api.eu-west-2.amazonaws.com/dev/user/findUserShortVideo?item_id=${uploadResponse.data.item_id}`;
       const detailsResponse = await axios.get(detailsEndpoint);
+      console.log("Response from get details endpoint:", detailsResponse);
 
       setDetailsResponse(detailsResponse.data);
       const endTime = performance.now();
