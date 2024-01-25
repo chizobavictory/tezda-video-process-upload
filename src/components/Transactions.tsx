@@ -20,21 +20,51 @@ const Transactions = () => {
   const [requestBody, setRequestBody] = useState({ location: "", ipAddress: "" });
 
   useEffect(() => {
-    const fetchUserCountry = async () => {
+    const fetchUserLocation = async () => {
       try {
-        const response = await axios.get("https://ipinfo.io/json");
-        console.log("Response from IP info:", response);
-        setUserCountry(response.data.country);
-        setUserIpAddress(response.data.ip);
-        setRequestBody({ location: response.data.country, ipAddress: response.data.ip });
+        // Check if geoip2 is defined (provided by MaxMind script)
+        // @ts-ignore
+        if (typeof geoip2 !== 'undefined') {
+          // @ts-ignore
+
+          geoip2.city(
+            (geoipResponse: { country: { names: { en: any; }; }; traits: { ip_address: any; }; }) => {
+              setUserCountry(geoipResponse.country.names.en || null);
+              setUserIpAddress(geoipResponse.traits.ip_address || null);
+              setRequestBody({ location: geoipResponse.country.names.en || null, ipAddress: geoipResponse.traits.ip_address || null });
+            },
+            (error: any) => {
+              console.error("Error fetching user location:", error);
+            }
+          );
+        } else {
+          console.warn("MaxMind geoip2 not available. Check if the script is included.");
+        }
       } catch (error) {
-        console.error("Error fetching user country:", error);
+        console.error("Error fetching user location:", error);
       }
     };
 
-    fetchUserCountry();
+    fetchUserLocation();
   }, []);
 
+  // useEffect(() => {
+  //   const fetchUserCountry = async () => {
+  //     try {
+  //       const response = await axios.get("https://ipinfo.io/json");
+  //       console.log("Response from IP info:", response);
+  //       setUserCountry(response.data.country);
+  //       setUserIpAddress(response.data.ip);
+  //       setRequestBody({ location: response.data.country, ipAddress: response.data.ip });
+  //     } catch (error) {
+  //       console.error("Error fetching user country:", error);
+  //     }
+  //   };
+
+  //   fetchUserCountry();
+  // }, []);
+  
+    
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const handleUserIdChange = (event: React.ChangeEvent<HTMLInputElement>) => {
