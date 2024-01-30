@@ -6,6 +6,7 @@ import FileBase64 from "react-file-base64";
 
 const Transactions = () => {
   const [userId, setUserId] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
   const [videoData, setVideoData] = useState<File | null>(null);
   const [uploadResponse, setUploadResponse] = useState<any | null>(null);
   const [detailsResponse, setDetailsResponse] = useState<any | null>(null);
@@ -17,21 +18,21 @@ const Transactions = () => {
   const [loadingMessage, setLoadingMessage] = useState<string | null>(null);
   const [userCountry, setUserCountry] = useState<string | null>(null);
   const [userIpAddress, setUserIpAddress] = useState<string | null>(null);
-  const [requestBody, setRequestBody] = useState({ location: "", ipAddress: "" });
+  const [requestBody, setRequestBody] = useState({ location: "", ipAddress: "", description: "" });
 
   useEffect(() => {
     const fetchUserLocation = async () => {
       try {
         // Check if geoip2 is defined (provided by MaxMind script)
         // @ts-ignore
-        if (typeof geoip2 !== 'undefined') {
+        if (typeof geoip2 !== "undefined") {
           // @ts-ignore
 
           geoip2.city(
-            (geoipResponse: { country: { names: { en: any; }; }; traits: { ip_address: any; }; }) => {
+            (geoipResponse: { country: { names: { en: any } }; traits: { ip_address: any } }) => {
               setUserCountry(geoipResponse.country.names.en || null);
               setUserIpAddress(geoipResponse.traits.ip_address || null);
-              setRequestBody({ location: geoipResponse.country.names.en || null, ipAddress: geoipResponse.traits.ip_address || null });
+              setRequestBody({ location: geoipResponse.country.names.en || null, ipAddress: geoipResponse.traits.ip_address || null, description });
             },
             (error: any) => {
               console.error("Error fetching user location:", error);
@@ -46,7 +47,7 @@ const Transactions = () => {
     };
 
     fetchUserLocation();
-  }, []);
+  }, [description]);
 
   // useEffect(() => {
   //   const fetchUserCountry = async () => {
@@ -63,12 +64,16 @@ const Transactions = () => {
 
   //   fetchUserCountry();
   // }, []);
-  
-    
+
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const handleUserIdChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setUserId(event.target.value);
+  };
+
+  const handleDescriptionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setDescription(event.target.value);
+    setRequestBody({ ...requestBody, description: event.target.value });
   };
 
   const getItemIdFromPresignedUrl = (presignedUrl: string) => {
@@ -102,7 +107,7 @@ const Transactions = () => {
       setLoading(true);
 
       // Step 1: Request a presigned URL
-      const presignedUrlResponse = await axios.post(presignedUrlEndpoint, requestBody); 
+      const presignedUrlResponse = await axios.post(presignedUrlEndpoint, requestBody);
       console.log("Response from presigned URL request:", presignedUrlResponse);
       const user_id = presignedUrlResponse.data.user_id;
       const presignedUrl = presignedUrlResponse.data.data;
@@ -223,12 +228,21 @@ const Transactions = () => {
               labels based on the uploaded video (AWS rekognition and redshift) and the adaptive bitrates of the video (FFMPEG)
             </p>
           </div>
-          <div>
-            <input
-              className='bg-gray-100 text-neutral-900 p-4 items-center flex gap-2 rounded-full font-[degularsemibold] h-12'
-              onChange={handleUserIdChange}
-              placeholder='Enter User ID'
-            />
+          <div className='flex gap-8'>
+            <div>
+              <input
+                className='bg-gray-100 text-neutral-900 p-4 items-center flex gap-2 rounded-full font-[degularsemibold] h-12'
+                onChange={handleUserIdChange}
+                placeholder='Enter User ID'
+              />
+            </div>
+            <div>
+              <input
+                className='bg-gray-100 text-neutral-900 p-4 items-center flex gap-2 rounded-full font-[degularsemibold] h-12'
+                onChange={handleDescriptionChange}
+                placeholder='Enter description'
+              />
+            </div>
           </div>
         </div>
         <div className='flex flex-col gap-2 md:w-1/2'>
