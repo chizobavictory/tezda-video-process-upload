@@ -164,34 +164,38 @@ const Transactions = () => {
       toast.error("Please upload a video first");
       return;
     }
-
+  
     try {
       setLoadingMessage("Loading all video details...");
       setLoading(true);
       toast.info("Loading all video details...");
-
+  
       // Hit the details endpoint once
       const detailsEndpoint = `https://kl8no40qhb.execute-api.eu-west-2.amazonaws.com/test/user/findUserShortVideo?item_id=${uploadResponse.data.item_id}`;
-      const detailsResponse = await axios.get(detailsEndpoint);
+      const detailsResponse = await axios.get(detailsEndpoint, {
+        headers: {
+          "x-api-key": "fwKwNZDxCRJpMWkLXetP1UQHnuUNqj65bCVXe159",
+        },
+      });
       console.log("Response from get details endpoint:", detailsResponse);
-
+  
       setDetailsResponse(detailsResponse.data);
       const endTime = performance.now();
-
+  
       // Check completeness of the response
       const isResponseComplete = expectedAttributes.every((attr) => attr in detailsResponse.data.data);
-
+  
       if (isResponseComplete) {
         toast.success("Video details loaded successfully!");
         // Calculate and update the time taken
         const timeTaken = (endTime - startTime) / 100; // Convert to seconds
         setTimeTaken(timeTaken);
-
+  
         // Set video URLs
         setVideo360pUrl(detailsResponse.data.data.adaptiveBitrateS3Url360p);
         setVideo540pUrl(detailsResponse.data.data.adaptiveBitrateS3Url540p);
         setVideo720pUrl(detailsResponse.data.data.adaptiveBitrateS3Url720p);
-
+  
         // Auto-load the uploaded video into the video player
         if (videoRef.current) {
           // Assuming the video URL is correctly returned from the API
@@ -217,6 +221,7 @@ const Transactions = () => {
       setLoadingMessage(null); // Reset loading message after handling response
     }
   };
+  
 
   return (
     <div className='flex flex-col md:pt-15 pt-5'>
