@@ -100,18 +100,22 @@ const Transactions = () => {
       toast.error("Please enter user ID and select a video");
       return;
     }
-
-    const presignedUrlEndpoint = `https://kl8no40qhb.execute-api.eu-west-2.amazonaws.com/dev/user/createUserUploadPresignedUrl?user_id=${userId}`;
-
+  
+    const presignedUrlEndpoint = `https://kl8no40qhb.execute-api.eu-west-2.amazonaws.com/test/user/createUserUploadPresignedUrl?user_id=${userId}`;
+  
     try {
       setLoading(true);
-
+  
       // Step 1: Request a presigned URL
-      const presignedUrlResponse = await axios.post(presignedUrlEndpoint, requestBody);
+      const presignedUrlResponse = await axios.post(presignedUrlEndpoint, requestBody, {
+        headers: {
+          "x-api-key": "fwKwNZDxCRJpMWkLXetP1UQHnuUNqj65bCVXe159",
+        },
+      });
       console.log("Response from presigned URL request:", presignedUrlResponse);
       const user_id = presignedUrlResponse.data.user_id;
       const presignedUrl = presignedUrlResponse.data.data;
-
+  
       // Step 2: Upload the video to S3 using the presigned URL
       console.log("Uploading video data:", videoData);
       await axios.put(presignedUrl, videoData, {
@@ -120,15 +124,15 @@ const Transactions = () => {
           "Access-Control-Allow-Origin": "*",
         },
       });
-
+  
       const item_id = getItemIdFromPresignedUrl(presignedUrl);
-
+  
       // Step 3: After a successful upload, you can now trigger other actions or display a success message.
       setUploadResponse({ message: "Video uploaded successfully", data: { presignedUrl, item_id, user_id } });
       toast.success("Video uploaded successfully!");
     } catch (error: any) {
       console.error("Error during upload:", error);
-
+  
       if (error.response) {
         toast.error(`Error during upload: ${error.response.data.message}`);
       } else {
@@ -138,7 +142,7 @@ const Transactions = () => {
       setLoading(false);
     }
   };
-
+  
   const expectedAttributes = [
     "item_id",
     "parentLabels",
@@ -167,7 +171,7 @@ const Transactions = () => {
       toast.info("Loading all video details...");
 
       // Hit the details endpoint once
-      const detailsEndpoint = `https://kl8no40qhb.execute-api.eu-west-2.amazonaws.com/dev/user/findUserShortVideo?item_id=${uploadResponse.data.item_id}`;
+      const detailsEndpoint = `https://kl8no40qhb.execute-api.eu-west-2.amazonaws.com/test/user/findUserShortVideo?item_id=${uploadResponse.data.item_id}`;
       const detailsResponse = await axios.get(detailsEndpoint);
       console.log("Response from get details endpoint:", detailsResponse);
 
