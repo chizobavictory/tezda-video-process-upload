@@ -21,10 +21,7 @@ const Transactions: React.FC = () => {
     const loadVideo = () => {
       if (Hls.isSupported() && videoRef.current) {
         const hls = new Hls();
-        const sourceUrl = cookie
-          ? `/proxy?targetUrl=${encodeURIComponent(videoUrl)}&cookie=${encodeURIComponent(cookie)}`
-          : videoUrl;
-        hls.loadSource(sourceUrl);
+        hls.loadSource(`/proxy?targetUrl=${encodeURIComponent(videoUrl)}${cookie ? `&cookie=${encodeURIComponent(cookie)}` : ''}`);
         hls.attachMedia(videoRef.current);
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
           videoRef.current?.play().catch((error) => {
@@ -32,10 +29,7 @@ const Transactions: React.FC = () => {
           });
         });
       } else if (videoRef.current?.canPlayType('application/vnd.apple.mpegurl')) {
-        const sourceUrl = cookie
-          ? `/proxy?targetUrl=${encodeURIComponent(videoUrl)}&cookie=${encodeURIComponent(cookie)}`
-          : videoUrl;
-        videoRef.current.src = sourceUrl;
+        videoRef.current.src = `/proxy?targetUrl=${encodeURIComponent(videoUrl)}${cookie ? `&cookie=${encodeURIComponent(cookie)}` : ''}`;
         videoRef.current.addEventListener('loadedmetadata', () => {
           videoRef.current?.play().catch((error) => {
             toast.error(`Error playing video: ${error.message}`);
@@ -45,16 +39,12 @@ const Transactions: React.FC = () => {
     };
 
     if (videoUrl) {
-      if (cookie) {
-        axios
-          .get(`/proxy?targetUrl=${encodeURIComponent(videoUrl)}&cookie=${encodeURIComponent(cookie)}`)
-          .then(loadVideo)
-          .catch((error) => {
-            toast.error(`Error loading video with cookie: ${error.message}`);
-          });
-      } else {
-        loadVideo();
-      }
+      axios
+        .get(`/proxy?targetUrl=${encodeURIComponent(videoUrl)}${cookie ? `&cookie=${encodeURIComponent(cookie)}` : ''}`)
+        .then(loadVideo)
+        .catch((error) => {
+          toast.error(`Error loading video${cookie ? ' with cookie' : ''}: ${error.message}`);
+        });
     }
   }, [videoUrl, cookie]);
 
