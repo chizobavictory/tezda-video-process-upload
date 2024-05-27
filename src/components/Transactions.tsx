@@ -18,13 +18,10 @@ const Transactions: React.FC = () => {
   };
 
   useEffect(() => {
-    const loadVideo = () => {
+    const loadVideo = (url: string) => {
       if (Hls.isSupported() && videoRef.current) {
         const hls = new Hls();
-        const sourceUrl = cookie
-          ? `/proxy?targetUrl=${encodeURIComponent(videoUrl)}&cookie=${encodeURIComponent(cookie)}`
-          : videoUrl;
-        hls.loadSource(sourceUrl);
+        hls.loadSource(url);
         hls.attachMedia(videoRef.current);
         hls.on(Hls.Events.MANIFEST_PARSED, () => {
           videoRef.current?.play().catch((error) => {
@@ -32,10 +29,7 @@ const Transactions: React.FC = () => {
           });
         });
       } else if (videoRef.current?.canPlayType('application/vnd.apple.mpegurl')) {
-        const sourceUrl = cookie
-          ? `/proxy?targetUrl=${encodeURIComponent(videoUrl)}&cookie=${encodeURIComponent(cookie)}`
-          : videoUrl;
-        videoRef.current.src = sourceUrl;
+        videoRef.current.src = url;
         videoRef.current.addEventListener('loadedmetadata', () => {
           videoRef.current?.play().catch((error) => {
             toast.error(`Error playing video: ${error.message}`);
@@ -45,16 +39,19 @@ const Transactions: React.FC = () => {
     };
 
     if (videoUrl) {
-      if (cookie) {
-        axios
-          .get(`/proxy?targetUrl=${encodeURIComponent(videoUrl)}&cookie=${encodeURIComponent(cookie)}`)
-          .then(loadVideo)
-          .catch((error) => {
-            toast.error(`Error loading video with cookie: ${error.message}`);
-          });
-      } else {
-        loadVideo();
-      }
+      const proxyUrl = new URL('https://express-video-k41u.onrender.com/proxy');
+      proxyUrl.searchParams.append('targetUrl', videoUrl);
+      proxyUrl.searchParams.append('cookie', cookie);
+
+      axios
+        .get(proxyUrl.toString(), { responseType: 'arraybuffer' })
+        .then((response) => {
+          const url = URL.createObjectURL(new Blob([response.data]));
+          loadVideo(url);
+        })
+        .catch((error) => {
+          toast.error(`Error loading video: ${error.message}`);
+        });
     }
   }, [videoUrl, cookie]);
 
